@@ -35,18 +35,39 @@ Add it to your `INSTALLED_APPS`:
         ...
     )
 
-Add Multiple Select Widget's URL patterns:
+Add Multiple Select Widget's to your forms:
 
 .. code-block:: python
 
-    from multiple_select_widget import urls as multiple_select_widget_urls
+    class GroupChangeForm(forms.ModelForm):
 
+        users = MSWModelMultipleChoiceField(
+            queryset=User.objects.all(),
+            required=False,
+            widget=MultipleSelectWidget('Users', reverse_lazy('user_filter'), lazy=True, use_async=True),
+        )
 
-    urlpatterns = [
-        ...
-        url(r'^', include(multiple_select_widget_urls)),
-        ...
-    ]
+For Django Admin user register using the form
+
+.. code-block:: python
+
+    @admin.register(Group)
+    class GroupAdmin(admin.ModelAdmin):
+        form = GroupChangeForm
+
+Add the autocomplete view MultipleSelectWidgetView to urls.py
+
+.. code-block:: python
+
+    ### views.py
+    class UsersAutocompleteMSWView(MultipleSelectWidgetView):
+        model = User
+        fields = ('email__icontains',)
+        obj_limit = 100
+
+    ### urls.py
+    path('user/autocomplete-msw/', UsersAutocompleteMSWView.as_view(), name='user_autocomplete_msw'),
+
 
 Features
 --------
